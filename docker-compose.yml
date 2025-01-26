@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # Serviço PHP com FPM
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: globalstore-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html:cached
+    environment:
+      - APP_ENV=local
+    networks:
+      - globalstore-network
+
+  # Serviço Nginx
+  nginx:
+    image: nginx:latest
+    container_name: globalstore-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - .:/var/www/html:cached
+    depends_on:
+      - app
+    networks:
+      - globalstore-network
+
+  # Serviço MySQL
+  db:
+    image: mysql:5.7
+    container_name: globalstore-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root  # Senha do root
+      MYSQL_DATABASE: globalstore # Banco de dados a ser criado
+      MYSQL_USER: user           # Usuário normal
+      MYSQL_PASSWORD: password   # Senha do usuário normal
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - globalstore-network
+
+  # Serviço PhpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: globalstore-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db              # Nome do serviço do banco de dados
+      MYSQL_ROOT_PASSWORD: root  # Senha do root
+    ports:
+      - "8080:80"
+    networks:
+      - globalstore-network
+
+networks:
+  globalstore-network:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
