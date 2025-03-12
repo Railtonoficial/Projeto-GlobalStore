@@ -26,3 +26,9 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias e ferramentas:
 ```bash
 git clone https://github.com/seu-usuario/globalstore.git
 cd globalstore
+```
+### 1️⃣ Rodar Projeto:
+```bash
+docker-compose up -d --build
+````
+
